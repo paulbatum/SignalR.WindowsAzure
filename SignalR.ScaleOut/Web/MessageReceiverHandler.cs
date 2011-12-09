@@ -53,14 +53,12 @@ namespace SignalR.Web
             if (!String.IsNullOrEmpty(generateMessageId))
             {
                 // Generate message id
-                var messageId = signalBus.MessageIdGenerator.GenerateMessageId(generateMessageId)
-                    .Success(t =>
-                                  {
-                                      context.Response.AddHeader(
-                                          PeerToPeerHelper.HeaderPrefix + PeerToPeerHelper.RequestKeys.GenerateMessageId,
-                                          t.Result.ToString());
-                                      context.Response.Write(PeerToPeerHelper.ResponseValues.Ack);
-                                  });
+                var messageId = signalBus.MessageIdGenerator.GenerateMessageId(generateMessageId).Result;
+                
+                context.Response.AppendHeader(
+                    PeerToPeerHelper.HeaderPrefix + PeerToPeerHelper.RequestKeys.GenerateMessageId,
+                    messageId.ToString());
+                context.Response.Write(PeerToPeerHelper.ResponseValues.Ack);
             }
         }
     }

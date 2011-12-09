@@ -14,12 +14,16 @@ namespace SignalR.ScaleOut.WindowsAzure
             // Ensure SignalR.ScaleOut has started
             SignalR.ScaleOut.PreApplicationStart.Start();
 
-            // Wire our own stuff in
-            DependencyResolver.Register(typeof(IPeerUrlSource), () => new WindowsAzurePeerUrlSource());
-            DependencyResolver.Register(typeof(IMessageIdGenerator), () => new WindowsAzureMasterPeerMessageIdGenerator());
+            var urlSource = new WindowsAzurePeerUrlSource();
+            var idGenerator = new WindowsAzureMasterPeerMessageIdGenerator();
+            var busAndStore = new PeerToPeerSignalBusMessageStore(idGenerator);
 
-            DependencyResolver.Register(typeof(ISignalBus), () => new PeerToPeerSignalBusMessageStore(DependencyResolver.Resolve<IMessageIdGenerator>()));
-            DependencyResolver.Register(typeof(IMessageStore), () => new PeerToPeerSignalBusMessageStore(DependencyResolver.Resolve<IMessageIdGenerator>()));
+            // Wire our own stuff in
+            DependencyResolver.Register(typeof(IPeerUrlSource), () => urlSource);
+            DependencyResolver.Register(typeof(IMessageIdGenerator), () => idGenerator);
+
+            DependencyResolver.Register(typeof(ISignalBus), () => busAndStore);
+            DependencyResolver.Register(typeof(IMessageStore), () => busAndStore);
         }
 
     }
